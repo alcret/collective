@@ -90,7 +90,7 @@ def sim_pearson(prefs, p1, p2):
 
 
 # 为评论者打分
-def toMatches(prefs, person, n=5, similarity=sim_pearson):
+def topMatches(prefs, person, n=5, similarity=sim_pearson):
     scores = [(similarity(prefs, person, other), other) for other in prefs if other != person]
     # 排序
     scores.sort()
@@ -100,7 +100,32 @@ def toMatches(prefs, person, n=5, similarity=sim_pearson):
 
 # print toMatches(critics, 'Toby', n=3)
 
+def transformPrefs(prefs):
+    result = {}
+    for person in prefs:
+        for item in prefs[person]:
+            result.setdefault(item, {})
 
+            # Flip item and person
+            result[item][person] = prefs[person][item]
+    return result
+
+
+def calculateSimilarItems(prefs, n=10):
+    # Create a dictionary of items showing which other items they
+    # are most similar to.
+    result = {}
+    # Invert the preference matrix to be item-centric
+    itemPrefs = transformPrefs(prefs)
+    c = 0
+    for item in itemPrefs:
+        # Status updates for large datasets
+        c += 1
+        if c % 100 == 0: print "%d / %d" % (c, len(itemPrefs))
+        # Find the most similar items to this one
+        scores = topMatches(itemPrefs, item, n=n, similarity=sim_distance)
+        result[item] = scores
+    return result
 
 
 
@@ -137,6 +162,7 @@ def getRecommendations(prefs,person,similarity=sim_pearson):
 
 #coding= utf-8
 def loadMovieLens(path='F:/cloud/ML/Collective_Intelligence/collective/chapter2/chapter2_last/ml-100k'):
+    #获取影片标题
     movies = {}
     for line in open(path+'/u.item'):
         (id,title) = line.split('|')[0:2]
@@ -152,4 +178,5 @@ def loadMovieLens(path='F:/cloud/ML/Collective_Intelligence/collective/chapter2/
         prefs[user][movies[movieid]] = float(rating)
     return prefs
 
-loadMovieLens()
+prefs =loadMovieLens()
+print getRecommendations(prefs,'87')[0:30]
