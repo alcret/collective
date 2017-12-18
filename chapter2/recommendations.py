@@ -132,5 +132,24 @@ def getRecommendations(prefs,person,similarity=sim_pearson):
     rankings.reverse()
     return rankings
 
-print getRecommendations(critics,'Toby')
-print getRecommendations(critics,'Toby',similarity=sim_distance)
+# print getRecommendations(critics,'Toby')
+# print getRecommendations(critics,'Toby',similarity=sim_distance)
+
+#coding= utf-8
+def loadMovieLens(path='F:/cloud/ML/Collective_Intelligence/collective/chapter2/chapter2_last/ml-100k'):
+    movies = {}
+    for line in open(path+'/u.item'):
+        (id,title) = line.split('|')[0:2]
+        movies[id] = title
+        # print(movies)
+# loadMovieLens()
+
+#加载数据
+    prefs={}
+    for line in open(path+'/u.data'):
+        (user,movieid,rating,ts) = line.split('\t')
+        prefs.setdefault(user,{})
+        prefs[user][movies[movieid]] = float(rating)
+    return prefs
+
+loadMovieLens()
